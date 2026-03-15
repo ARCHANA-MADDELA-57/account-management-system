@@ -3,33 +3,61 @@ import { Link } from "react-router-dom";
 import api from "../services/api";
 
 function Signup() {
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   const handleSignup = async (e) => {
+
     e.preventDefault();
 
+    setError("");
+    setSuccess("");
+
+    if (!name || !email || !password) {
+      setError("All fields are required");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
     try {
-      const res = await api.post("/auth/signup", {
+
+      await api.post("/auth/signup", {
         name,
         email,
-        password,
+        password
       });
 
-      alert("Signup successful");
+      setSuccess("Signup successful! Please login.");
 
-      console.log(res.data);
-    } catch (error) {
-      alert(error.response.data.message);
+      setName("");
+      setEmail("");
+      setPassword("");
+
+    } catch (err) {
+
+      setError(err.response?.data?.message || "Signup failed");
+
     }
+
   };
 
   return (
+
     <div>
+
       <h2>Signup</h2>
 
       <form onSubmit={handleSignup}>
+
         <input
           placeholder="Name"
           value={name}
@@ -37,6 +65,7 @@ function Signup() {
         />
 
         <input
+        type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -50,13 +79,21 @@ function Signup() {
         />
 
         <button type="submit">Signup</button>
+
       </form>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && <p style={{ color: "green" }}>{success}</p>}
+
       <p style={{ textAlign: "center", marginTop: "10px" }}>
         Already have an account?
         <Link to="/login"> Login here</Link>
       </p>
+
     </div>
+
   );
+
 }
 
 export default Signup;
